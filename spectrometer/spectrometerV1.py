@@ -6,6 +6,7 @@ from Device_Drivers import NewPort_Delay_Stage_225
 import pandas as pd
 
 # inputs for Spectrometer
+
 try:
     integration_time = int(input("Enter integration time (ms): "))
     scans_avg = int(input("Enter number of scans to average: "))
