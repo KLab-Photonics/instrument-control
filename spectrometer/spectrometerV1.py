@@ -4,6 +4,9 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from Device_Drivers import stellarnet_driver3 as sn
 from Device_Drivers import NewPort_Delay_Stage_225  
 import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
 # inputs for Spectrometer
 
@@ -31,7 +34,9 @@ step_size = (stop_pos - start_pos) / (num_steps - 1)
 positions = [round(start_pos + i * step_size, 3) for i in range(num_steps)]
 
 # Convert Positions to Delay Times (in ps)
-delay_times_ps = [round(pos / 300000000, 5) for pos in positions]
+# Correct (one‐way mechanical → time in ps):
+delay_times_ps = [round((pos/1000)  / 3e8 * 1e12, 5) for pos in positions] # Multiply pos by 2 for two way if this is the case
+
 print(f"Stage positions: {positions}")
 
 # Setup Devices
@@ -66,6 +71,34 @@ try:
     sn.reset(spec)
     stage.close()
     print(" >>> Scan complete.")
+
+    #plotting data on 2D and 3D plots
+    spectra_array = np.array(spectra)  # shape: (num_steps, num_wavelengths)
+    fig = plt.figure(figsize=(14, 6))
+
+    # 2D plot (left side)
+    ax1 = fig.add_subplot(1, 2, 1)
+    ax1.plot(delay_times_ps, spectra_array[:, 0])
+    ax1.set_title("2D: Counts vs Time (First Wavelength)")
+    ax1.set_xlabel("Time (ps)")
+    ax1.set_ylabel("Amplitude (a.u.)")
+    ax1.grid(True)
+
+    # 3D subplot (right side)
+    ax2 = fig.add_subplot(1, 2, 2, projection='3d')
+    X, Y = np.meshgrid(delay_times_ps, wav) 
+    Z = spectra_array.T
+
+    surf = ax2.plot_surface(X, Y, Z, cmap='plasma', linewidth=0, antialiased=False)
+    ax2.set_title("3D Surface: Time vs Wavelength vs Counts")
+    ax2.set_xlabel("Time (ps)")
+    ax2.set_ylabel("Wavelength (nm)")
+    ax2.set_zlabel("Counts")
+
+    fig.colorbar(surf, ax=ax2, shrink=0.5, aspect=10, label="Counts")
+
+    plt.tight_layout()
+    plt.show()
 
     #Save to excel
     desktop_path = Path.home() / "Desktop" / "Spectrometer_readings.xlsx"
