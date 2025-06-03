@@ -3,11 +3,16 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from Device_Drivers import UHFLI, NewPort_Delay_Stage_225
 import pandas as pd
+import numpy as np
 import time
 import matplotlib.pyplot as plt
 
 """
 README:
+
+This is a script exactly like the lockinV1.py script, but with live plotting functionality added with the matplotlib library.
+
+
 
 Requirements:
 
@@ -113,14 +118,31 @@ def main():
 
     # Setup Live potting for dT
     plt.ion()
-    fig, ax = plt.subplots()
-    line_dT, = ax.plot([], [], 'o', label='dT (mV)')
-    ax.set_xlabel('Step value')
-    ax.set_ylabel('dT (mV)')
-    ax.set_title('Live dT vs Step')
-    ax.legend()
-    ax.grid(True)
+    fig1, ax_dT = plt.subplots(figsize=(8, 4))
+    line_dT, = ax_dT.plot([], [], 'o', label='dT (mV)')
+    ax_dT.set_xlabel('Step value')
+    ax_dT.set_ylabel('dT (mV)')
+    ax_dT.set_title('Live dT vs Step')
+    ax_dT.legend()
+    ax_dT.grid(True)
 
+    # Setup Live current position bar for move stage position (in mm)
+    fig2, ax_pos = plt.subplots(figsize=(8,2))
+    ax_pos.set_xlim(0, 225)
+    ax_pos.set_ylim(0, 1)
+    ax_pos.set_yticks([])
+    ax_pos.set_xlabel('Position (mm)')
+    ax_pos.set_ylabel('Current Position of stage')
+    major_positions = np.arange(0, 226, 25)
+    ax_pos.set_xticks(major_positions)
+    minor_positions = np.arange(0, 226, 5)
+    ax_pos.set_xticks(minor_positions, minor=True)
+    ax_pos.grid(which='minor', linestyle=':', linewidth=0.5)
+    bar = ax_pos.barh(y=0.5, width=0, left =0, height=0.3, color = 'red', edgecolor='black')
+    
+    
+
+    
     # Step 4: Movement setup
     while True:
         start_pos = float(input("Enter stage START position in mm (e.g. 150.345): "))
@@ -160,7 +182,7 @@ def main():
         r_prct = (dr / T_ref) * 100
         a_prct = - (dt + dr) * 100
         rel_pos = pos - start_pos
-        delay_ps = (rel_pos / 300_000_000)
+        delay_ps = (rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds)
 
         # Append results to storage arrays
         dT.append(dt)
@@ -178,13 +200,17 @@ def main():
         print(f"  dT = {dt:.3f} mV, dR = {dr:.3f} mV, dA = {da:.3f} mV")
         print(f"  %T = {t_prct:.2f}, %R = {r_prct:.2f}, %A = {a_prct:.2f}")
 
-        # ---------------- Live‐plot update ----------------
-        line_dT.set_data(range(len(dT)), dT)
-        ax.relim()
-        ax.autoscale_view()
-        plt.draw()
-        plt.pause(0.001)  
-        # --------------------------------------------------
+    # -- Live plotting of dT and current position bar --
+        line_dT.set_xdata(range(len(dT)))
+        line_dT.set_ydata(dT)
+        ax_dT.relim()
+        ax_dT.autoscale_view()
+        fig1.canvas.draw()
+        bar[0].set_width(pos)
+        fig2.canvas.draw()
+        plt.pause(0.001)
+    # --------------------------------------------------
+
     
     # Step 6: Disconnect devices
     stage.close()
@@ -199,7 +225,7 @@ def main():
     # Step 7: Peak detection & delay repositioning for excel 
     peak_index = dT.index(max(dT))
     peak_position = positions[peak_index]
-    delays_ps = [((pos - peak_position) / 300_000_000) for pos in positions]
+    delays_ps = [((pos - peak_position) / 1000) / 3e8 * 1e12 for pos in positions]
 
 
     # Step 8: Exporting results to Excel
