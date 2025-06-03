@@ -49,7 +49,7 @@ For Tyler:
 
 When running this script, look for errors within:
 - Baseline turning on/off (check the driver file if this is wrong)
-- The current delay outputs (check the main code for this)
+- The current delay outputs (check the main code for this) & find out why expected delay from files are not exactly at 0
 - The Quick Sweep functionality (only if the top two steps are done)
 - Need to check the LabVIEW code for the quick sweep functionality in general.
 """
@@ -149,7 +149,7 @@ def main():
         r_prct = (dr / T_ref) * 100
         a_prct = - (dt + dr) * 100
         rel_pos = pos - start_pos
-        delay_ps = (rel_pos / 300_000_000)
+        delay_ps = (rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds
 
         # Append results to storage arrays
         dT.append(dt)
@@ -167,6 +167,7 @@ def main():
         print(f"  dT = {dt:.3f} mV, dR = {dr:.3f} mV, dA = {da:.3f} mV")
         print(f"  %T = {t_prct:.2f}, %R = {r_prct:.2f}, %A = {a_prct:.2f}")
     
+
     # Step 6: Disconnect devices
     stage.close()
     lockin.disconnect()
@@ -176,7 +177,7 @@ def main():
     # Step 7: Peak detection & delay repositioning for excel 
     peak_index = dT.index(max(dT))
     peak_position = positions[peak_index]
-    delays_ps = [((pos - peak_position) / 300_000_000) for pos in positions]
+    delays_ps = [((pos - peak_position) / 1000) / 3e8 * 1e12 for pos in positions] # Convert mm to m, then to seconds, then to picoseconds
 
 
     # Step 8: Exporting results to Excel
