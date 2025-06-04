@@ -180,9 +180,9 @@ def main():
         da = - (dt + dr)
         t_prct = (dt / T_ref) * 100
         r_prct = (dr / T_ref) * 100
-        a_prct = - (dt + dr) * 100
+        a_prct =  (da / T_ref) * 100
         rel_pos = pos - start_pos
-        delay_ps = (rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds)
+        delay_ps = (2 * rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds)
 
         # Append results to storage arrays
         dT.append(dt)
@@ -225,7 +225,7 @@ def main():
     # Step 7: Peak detection & delay repositioning for excel 
     peak_index = dT.index(max(dT))
     peak_position = positions[peak_index]
-    delays_ps = [((pos - peak_position) / 1000) / 3e8 * 1e12 for pos in positions]
+    delays_ps = [((pos - peak_position) * 2 / 1000) / 3e8 * 1e12 for pos in positions]
 
 
     # Step 8: Exporting results to Excel

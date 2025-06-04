@@ -28,3 +28,4 @@ zhinst-core==25.4.0.628
 zhinst-timing-models==25.4.0
 zhinst-toolkit==0.7.1
 zhinst-utils==0.6.0
+matplotlib==3.9.2
