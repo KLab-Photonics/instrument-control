@@ -34,8 +34,8 @@ step_size = (stop_pos - start_pos) / (num_steps - 1)
 positions = [round(start_pos + i * step_size, 3) for i in range(num_steps)]
 
 # Convert Positions to Delay Times (in ps)
-# Correct (one‐way mechanical → time in ps):
-delay_times_ps = [round((pos/1000)  / 3e8 * 1e12, 5) for pos in positions] # Multiply pos by 2 for two way if this is the case
+# Correct (one‐way mechanical to time in ps):
+delay_times_ps = [round((2*pos/1000)  / 3e8 * 1e12, 5) for pos in positions] # Multiply pos by 2 for two way if this is the case
 
 print(f"Stage positions: {positions}")
 
@@ -57,20 +57,21 @@ try:
 
     spectra = []
     actual_positions = []
+    
+    try:
+        for i, pos in enumerate(positions):
+            print(f"\nMoving to {pos} mm ({i+1}/{len(positions)})")
+            stage.move_to(pos)
 
-    for i, pos in enumerate(positions):
-        print(f"\nMoving to {pos} mm ({i+1}/{len(positions)})")
-        stage.move_to(pos)
-
-        print("Taking data readings")
-        spectrum = sn.array_spectrum(spec, wav)
-        spectra.append(spectrum)
-        actual_positions.append(pos)
-
-    #close devices
-    sn.reset(spec)
-    stage.close()
-    print(" >>> Scan complete.")
+            print("Taking data readings")
+            spectrum = sn.array_spectrum(spec, wav)
+            spectra.append(spectrum)
+            actual_positions.append(pos)
+    finally:
+        #close devices
+        sn.reset(spec)
+        stage.close()
+        print(" >>> Scan complete.")
 
     #plotting data on 2D and 3D plots
     spectra_array = np.array(spectra)  # shape: (num_steps, num_wavelengths)
@@ -78,9 +79,10 @@ try:
 
     # 2D plot (left side)
     ax1 = fig.add_subplot(1, 2, 1)
-    ax1.plot(delay_times_ps, spectra_array[:, 0])
-    ax1.set_title("2D: Counts vs Time (First Wavelength)")
-    ax1.set_xlabel("Time (ps)")
+    spectrum_idx = 0  # Change to another index to plot a different spectrum
+    ax1.plot(wav, spectra_array[spectrum_idx, :])
+    ax1.set_title(f"2D: Spectrum at Step {spectrum_idx+1}")
+    ax1.set_xlabel("Wavelength (nm)")
     ax1.set_ylabel("Amplitude (a.u.)")
     ax1.grid(True)
 
