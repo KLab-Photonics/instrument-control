@@ -119,6 +119,9 @@ def main():
             break
 
     steps = int(input("Enter number of steps: "))
+    if steps < 2:
+        print("Number of steps should be at least 2")
+        return
     step_size = (end_pos - start_pos) / (steps - 1)
     positions = [round(start_pos + i * step_size, 2) for i in range(steps)]
 
@@ -130,48 +133,58 @@ def main():
     dT, dR, dA = [], [], []
     dT_p, dR_p, dA_p = [], [], []
     delays_ps = []
-    position = []
+    recorded_positions = []
    
     
     # Step 5: Data collection & math
-    for i, pos in enumerate(positions):
-        print(f"\nStep {i}/{steps}: Moving to {pos} mm")
-        stage.move_to(pos)
-        time.sleep(0.4)  # 400 ms delay for stage to settle
+    try:    #try here to ensure devices are closed properly even if an error occurs
+        
+        print("Starting data collection...")
+        for i, pos in enumerate(positions):
+            print(f"\nStep {i}/{steps}: Moving to {pos} mm")
+            stage.move_to(pos)
+            time.sleep(0.4)  # 400 ms delay for stage to settle
 
-        # Read raw voltages from boxcars
-        dt = lockin.read_boxcar_voltage(0)
-        dr = lockin.read_boxcar_voltage(1)
+            # Read raw voltages from boxcars
+            dt = lockin.read_boxcar_voltage(0)
+            dr = lockin.read_boxcar_voltage(1)
 
-        # Calculations (verify these formulas)
-        da = - (dt + dr)
-        t_prct = (dt / T_ref) * 100
-        r_prct = (dr / T_ref) * 100
-        a_prct = (da / T_ref) * 100
-        rel_pos = pos - start_pos
-        delay_ps = (2 * rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds (Should be multiplied by 2)
+            # Calculations (verify these formulas)
+            da = - (dt + dr)
+            t_prct = (dt / T_ref) * 100
+            r_prct = (dr / T_ref) * 100
+            a_prct = (da / T_ref) * 100
+            rel_pos = pos - start_pos
+            delay_ps = (2 * rel_pos / 1000) / 3e8 * 1e12 # Convert mm to m, then to seconds, then to picoseconds (Should be multiplied by 2)
 
-        # Append results to storage arrays
-        dT.append(dt)
-        dR.append(dr)
-        dA.append(da)
-        position.append(pos)
-        dT_p.append(t_prct)
-        dR_p.append(r_prct)
-        dA_p.append(a_prct)
-        delays_ps.append(delay_ps)
+            # Append results to storage arrays
+            dT.append(dt)
+            dR.append(dr)
+            dA.append(da)
+            recorded_positions.append(pos)
+            dT_p.append(t_prct)
+            dR_p.append(r_prct)
+            dA_p.append(a_prct)
+            delays_ps.append(delay_ps)
 
-        # Print results for each data collection step (Can remove if desired, for debugging)
-        print(f"Step {i}/{steps}:")
-        print(f"  Position: {pos} mm, Delay: {delay_ps:.2f} ps")
-        print(f"  dT = {dt:.3f} mV, dR = {dr:.3f} mV, dA = {da:.3f} mV")
-        print(f"  %T = {t_prct:.2f}, %R = {r_prct:.2f}, %A = {a_prct:.2f}")
+            # Print results for each data collection step (Can remove if desired, for debugging)
+            print(f"Step {i}/{steps}:")
+            print(f"  Position: {pos} mm, Delay: {delay_ps:.2f} ps")
+            print(f"  dT = {dt:.3f} mV, dR = {dr:.3f} mV, dA = {da:.3f} mV")
+            print(f"  %T = {t_prct:.2f}, %R = {r_prct:.2f}, %A = {a_prct:.2f}")
     
-
+    
     # Step 6: Disconnect devices
-    stage.close()
-    lockin.disconnect()
-    print("Devices disconnected.")
+    finally:    #make sure devices are closed properly
+        try:
+            stage.close()
+        except Exception:   
+            pass
+        try:
+            lockin.disconnect()
+        except Exception:
+            pass
+        print("Devices disconnected.")
     
     
     # Step 7: Peak detection & delay repositioning for excel 
@@ -189,7 +202,7 @@ def main():
 
     # Full table of measured data
     pd.DataFrame({
-        "Position [mm]": position,
+        "Position [mm]": recorded_positions,
         "Delay [ps]": delays_ps,
         "dT [mV]": dT,
         "dR [mV]": dR,
