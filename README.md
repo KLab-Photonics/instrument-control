@@ -5,26 +5,25 @@ This repository contains Python scripts and device drivers for automated control
 ## Directory Structure
 
 instrument-control/
-│
-├── Device_Drivers/
-│   ├── stellarnet_driverLibs -> Drivers for the spectrometer
-│   ├── __init__.py           -> For Package Import Statements
-│   ├── lockin_driver.py      -> Driver File Created For The UHFLI
-│    └── move_stage_driver.py  -> Driver File Created For The DL225 Move Stage
-│
-├── lockin/
-│   ├── lockinlive.py         -> Main Script For The Lockin Experiments + Live Graping Of Data
-│   └── lockinV1.py           -> Main Script For The Lockin Experiments
-│
-├── spec_test/
-│   ├── connectiontest.py     -> Script To Test The Connection Of Devices Using Stellarnet Driver (after setup.py is ran)
-│   └── setup.py              -> One Time Setup To Use The Python Drivers For The Spectrometers
-│
-├── spectrometer/
-│   ├── driver_functions.py   -> A List Of Python Driver Functions From The Stellarnet Python Driver Documentation
-│   └── spectrometerV1.py     -> Main Script For Spectrometer Experiments
-│
-└── requirements.txt          -> List Of All Python Packages Needed For Functionality
+Device_Drivers/
+stellarnet_driverLibs -> Drivers for the spectrometer
+__init__.py           -> For Package Import Statements
+lockin_driver.py      -> Driver File Created For The UHFLI
+move_stage_driver.py  -> Driver File Created For The DL225 Move Stage
+
+lockin/
+lockinlive.py  -> Main Script For The Lockin Experiments + Live Graping Of Data
+lockinV1.py    -> Main Script For The Lockin Experiments
+
+spec_test/
+connectiontest.py  -> Script To Test The Connection Of Devices Using Stellarnet Driver (after setup.py is ran)
+setup.py           -> One Time Setup To Use The Python Drivers For The Spectrometers
+
+spectrometer/
+driver_functions.py -> A List Of Python Driver Functions From The Stellarnet Python Driver Documentation
+spectrometerV1.py   -> Main Script For Spectrometer Experiments
+
+requirements.txt    -> List Of All Python Packages Needed For Functionality
 
 
 ## Requirements
