@@ -238,7 +238,7 @@ def main():
     
     
     # Step 7: Peak detection & delay repositioning for excel 
-    peak_index = dT.index(max(dT))
+    peak_index = dT.index(max(dT, key = abs))
     peak_position = positions[peak_index]
     delays_ps = [((pos - peak_position) * 2 / 1000) / 3e8 * 1e12 for pos in positions]
 
