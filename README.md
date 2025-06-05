@@ -24,7 +24,7 @@ This repository contains Python scripts and device drivers for automated control
     │       ├── driver_functions.py   -> A List Of Python Driver Functions From The Stellarnet Python Driver Documentation
     │       └── spectrometerV1.py     -> Main Script For Spectrometer Experiments
     │
-    └── requirements.txt          -> List Of All Python Packages Needed For Functionality
+    └── requirements.txt              -> List Of All Python Packages Needed For Functionality
 
 
 ## Requirements
