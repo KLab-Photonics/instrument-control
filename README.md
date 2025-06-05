@@ -70,7 +70,7 @@ It also keeps everything in one place and organized in a terminal while there is
    
    pip install -r requirements.txt
    
-```
+
 4. Run the desired script, for example:
    
    python spectrometer/spectrometerV1.py
