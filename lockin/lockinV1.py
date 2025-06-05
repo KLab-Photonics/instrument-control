@@ -59,7 +59,14 @@ def main():
     # Step 0: Initialize devices
     # The UHFLI class is the lock‑in amplifier, and NewPort_Delay_Stage_225 is the delay stage
     lockin = UHFLI()
+    if not lockin.is_connected():
+        print("Error: Didn't connect to the UHFLI")
+        return
     stage = NewPort_Delay_Stage_225()
+    if not stage.is_connected():
+        print("Error: Didn't connect to the NewPort Delay Stage")
+        lockin.disconnect()
+        return
     # -------------------------------------------------------------------------------
 
     # Step 1: Reference Transmission (T_ref)
@@ -216,5 +223,8 @@ def main():
     print(f"Results saved to {desktop_path}")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nProgram stopped.")
 
