@@ -13,7 +13,7 @@ This repository contains Python scripts and device drivers for automated control
     │       └── move_stage_driver.py  -> Driver File Created For The DL225 Move Stage
     │
     ├── lockin/
-    │       ├── lockinlive.py         -> Main Script For The Lockin Experiments + Live Graphing Of Data
+    │       ├── lockinlive.py         -> Main Script For The Lockin Experiments + Live Graping Of Data
     │       └── lockinV1.py           -> Main Script For The Lockin Experiments
     │
     ├── spec_test/
