@@ -50,6 +50,7 @@ For Tyler:
 When running this script, look for errors within:
 - Baseline turning on/off (check the driver file if this is wrong)
 - The current delay outputs (check the main code for this) & find out why expected delay from files are not exactly at 0
+    - also is it a two way optical or one way delay? (pos multiplied by 2 or not)
 - The Quick Sweep functionality (only if the top two steps are done)
 - Need to check the LabVIEW code for the quick sweep functionality in general.
 """
